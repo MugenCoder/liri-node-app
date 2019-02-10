@@ -110,10 +110,8 @@ var queryUrl = ("https://rest.bandsintown.com/artists/" + artist + "/events?app_
 // spotify-this-song
 // movie-this
 // do-what-it-says
-// var concert = process.argv[2];
-// var song = process.argv[3];
-// var movie = process.argv[4];
-// var reccomendation = process.argv[5];
+
+
 
 
 
