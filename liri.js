@@ -4,123 +4,172 @@ require("dotenv").config();
 // sudo npm i axio -g
 var fs = require("fs");
 var keys = require("./keys");
-var axios = requie("./axios");
+var axios = require("axios");
 var Spotify = require("node-spotify-api");
 var moment = require("moment");
-var stingify = require("JSON-stingify-safe");
+var request = require("request");
 
-
-// create var to access key info 
+// Initialize the spotify API client using our client id and secret
 var spotify = new Spotify(keys.spotify);
 
-// cli input?
-var query = process.argv[2];
-var search = process.argv.slice(3).join(" ");
+var findArtists = function(artist) {
+  return artist.name;
+}
 
-// This block of code will create a file called "random.txt".
-fs.writeFile("random.txt", "utf-8", function(err) {
-// If the code experiences any errors it will log the error to the console.
-    if (err) {
-      return console.log(err);
-    } 
-// Otherwise, it will print: "random.txt was updated!"
-    console.log("random.txt was updated!");
-  });
-// search + query logic
-    if(process.argv[2] = " "){
-        var str = data;
-        var array = str.split(",");
+// Gift from Rachel: let's get your app running
+var getMeSpotify = function(songName) {
+  // todo: write your spotify api call logic here
+  if (songName === undefined) {
+    songName = 'Damn, Not A Thing, Kiddo';
+  }
 
-        console.log(array);
-        var outputTo = {
-            query: array[0],
-            search: array[1]
-        };
-        console.log(outputTo);
-            return outputTo;
-    }
+  spotify.search({ 
+    type: 'track',
+    query: songName 
+  },
+    function(err, res) {
+    if (err) return;
+    // console.log("somethings not right");
+    var songs = res.tracks.items;
 
-    if(query == "spotify-this-song"){
-        spotify
-            .search({type: track, query: search})
-            .then(function(response) {
+  for(i=0; i < songs.length; i++) {
+    console.log(i);
+     // map thru artist objects
+    console.log('artist:' + songs[i].artists.map(findArtists));
+    console.log('song:' + songs.map(findArtists));
+    // last two arent working
+    console.log('preview:' + songs.preview_url.map(findArtists));
+    console.log('album:' + songs.album.map(findArtists));
+    // TRIALS
+    // console.log('song:' + data.songs[i].songName);
+    // console.log('preview:' + data.songs[i].artists.preview_url);
+    // console.log('album:' + data.songs[i].artists.album.name);
+  }
+  })
+}
 
-            var spotifyInfo = response.tracks.items[0];
-            console.log(JSON.stringify(response.tracks.items[0],null,2));
-    })
+var findCommand = function(caseData, functionData) {
+  switch (caseData) {
+    // command typed by user
+    case "spotify-this-song":
+      // name of function to handle spotify command
+      getMeSpotify(functionData);
+      break;
+    default:
+      console.log("LIRI doesn't know that song");
+  }
 };
 
-// spotify callback console-view vars
-var artist = spotifyInfo.artists[0].name;
-var songName = spotify.song.name;
-var preview = spotify.preview;
-var album = spotfyInfo.album;
-    // When the magic isn't working
-    if(songName === null){
-        console.log("Not A Thing, Bro");
-        console.log("Also Not A Thing");
-        console.log("Can't Do What's Never Heard Of");
-        console.log("No Album Art, Fam")
-    } else {
-    // When you feel fucking magical
-    console.log("Artist: + ");
-    console.log("Song: +");
-    console.log("Song Preview: +");
-    console.log("Album: +");
-    } 
+// var movieSearch = new Movie();
+var findMovie = function(caseData,functionData) {
+  switch (caseData) {
+    case 'movie-this':
+    movieSearch(functionData);
+    break;
+    default:
+      console.log("LIRI can't watch that movie");
+  }
+};
 
-    if(query == "concert-this"){
-        search = process.argv.slice[3].join(" ");
-        console.log(element);
+  // TRIALS/WORKING OPT 
+  // var findMovie = function(movieSearch) {
+  //   return movieSearch.name;
+  // }
+    if(findMovie === undefined){
+      findMovie = "mr nobody";
     }
 
-// node liri.js concert-this <artist/band name here>
-// This will search the Bands in Town Artist Events API ("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp") for an artist and render the following information about each event to the terminal:
-// Name of the venue
-// Venue location
-// Date of the Event (use moment to format this as "MM/DD/YYYY")
+// HTTP GET request
+request("http://www.omdbapi.com/?t=" + findMovie + "&y=&plot=short&r=json", function(err, res, body) {
+  if (!err && res.statusCode === 200) {
+    console.log("* Title of the movie:         " + JSON.parse(body).Title);
+    console.log("* Year the movie came out:    " + JSON.parse(body).Year);
+    console.log("* IMDB Rating of the movie:   " + JSON.parse(body).imdbRating);
+    console.log("* Country produced:           " + JSON.parse(body).Country);
+    console.log("* Language of the movie:      " + JSON.parse(body).Language);
+    console.log("* Plot of the movie:          " + JSON.parse(body).Plot);
+    console.log("* Actors in the movie:        " + JSON.parse(body).Actors);
 
-// axios requests B.I.T. API
-var queryUrl = ("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp");
-    console.log(queryUrl);
 
-    axios.get(queryUrl).then(function(response) {
-        var jsonData = response.data;
-        console.log(stinginfy(response.data[0], null, 2))
+      // Ratings for loop -- iterate thru all object rating values
+      // PARSE = PRIIIINNNTTT ROTTEN TOMATOES [JSON] INFO
+	    for(var i = 0; i < JSON.parse(body).Ratings.length; i++) {
+	    	if(JSON.parse(body).Ratings[i].Source === "Rotten Tomatoes") {
+	    		console.log("* Rotten Tomatoes Rating:     " + JSON.parse(body).Ratings[i].Value);
+	    		if(JSON.parse(body).Ratings[i].Website !== undefined) {
+	    			console.log("* Rotten Tomatoes URL:        " + JSON.parse(body).Ratings[i].Website);
+	    		}
+	    	}
+	    }
+	  }
+  });
+  
+  var findBand = function(caseData,functionData) {
+    switch (caseData) {
+      case 'concert-this':
+      movieSearch(functionData);
+      break;
+      default:
+        console.log("LIRI can't watch that band");
+    }
+  };
+
+  get("https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp"){ 
+  if (!err) {
+    console.log("* Name of the venue:         " + JSON.parse(body).venue);
+    console.log("* Venue location:    " + JSON.parse(body).venueLocaction);
+    console.log("* Date of the Event:   " + JSON.parse(moment()).format());
+
+    for(var i = 0; i < JSON.parse(body).findBand.length; i++) {
+      if(JSON.parse(body).findBand[i] === "Bands In Town"){
+        console.log("Name of the venue:         " + JSON.parse(body).venue[i].value); }
+      }
+    }
+  }
+
+  // user input/app commands
+  if(command === "spotify-this-song") {
+    getMeSpotify(query);
+  } else if (commmand === "movie-this") {
+    findMovie(request)
+  } else if(command === "do-what-it-says") {
+    fs.readFile("random.txt", "utf-8", function(err, data) {
+      var command;
+      var query;
+  
+      // If there is a comma, then we will split the string to differentiate between command and query
+      // 	--> if there is no comma, then only the command is considered!!
+      if(data.indexOf(",") !== -1) {
+        var dataArr = data.split(",");
+        command = dataArr[0];
+        query = dataArr[1];
+      } else {
+        command = data;
+      }
+  
+      // Choose terminal command and run designated function
+      if(command === "spotify-this-song") {
+        spotifyThisSong(query);
+      } else if(command === "movie-this") {
+        movieThis(query);
+      } else { // Use case where the command is not recognized
+        console.log("Command from file is not a valid command! Please try again.")
+      }
     });
-
-    var bandInfo = response.data[0];
-
-    // info to render to terminal
-    var venue = bandInfo.venue.name;
-    var location = bandInfo.city + " ", bandInfo.region + " ", bandInfo.country + " ";  
-    // Date of the Event (use moment to format this as "MM/DD/YYYY")
-    // define(['moment'], function (moment) {
-    // console.log(moment().format('LLLL'));  // 'Friday, June 24, 2016 1:42 AM'// });
-    var eventDate = moment(bandInfo.date "MM/DD/YYYY").format("MM/DD/YYYY");
-    console.log("Venue: + venue");
-    console.lot("Location + location");
-    console.log(Date: + date);
+  } else if(command === undefined) { // use case where no command is given
+    console.log("Please enter a command to run LIRI.")
+  } else { // use case where command is given but not recognized
+    console.log("Not the Path You seek. Again, try.")
+  }
 
 
+// commands opts for initiation -- "We ARE the initiated, Bruce" - Bane
+var runLiri = function(argOne, argTwo) {
+  findCommand(argOne, argTwo);
+  findMovie();
+};
 
+// Form Voltron
+runLiri(process.argv[2], process.argv.slice(3).join(" "));
 
-// Make it so liri.js can take in one of the following commands:
-// concert-this
-// spotify-this-song
-// movie-this
-// do-what-it-says
-
-
-
-
-
-
-
-// if (a === b) {
-//     console.log(true);
-// }
-// else {
-//     console.log(false);
-// }
 
