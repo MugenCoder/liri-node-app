@@ -114,33 +114,41 @@ var findMovie = function(movieSearch) {
   );
 };
 
-var findBand = function(bandSearch) {
-  request(
-    "https://rest.bandsintown.com/artists/" +
-      bandSearch +
-      "/events?app_id=codingbootcamp",
-    function(err, res, body) {
-      if (!err) {
-        console.log("bands in town response", body);
+var findBand = function(artist) {
+  var queryURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp";
 
-        // Look at the shape of the response body, it is an array!ls
-        // console.log("* Name of the venue:         " + JSON.parse(body).venue);
-        // console.log("* Venue location:    " + JSON.parse(body).venueLocaction);
+  axios.get(queryURL).then(
+    function(response) {
+      var jsonData = response.data;
 
-        // Refresh on momentJS syntax, below throwing error
-        // console.log("* Date of the Event:   " + JSON.parse(moment()).format());
+      if (!jsonData.length) {
+        console.log("No results found for " + artist);
+        return;
+      }
 
-        // for (var i = 0; i < JSON.parse(body).findBand.length; i++) {
-        //   if (JSON.parse(body).findBand[i] === "Bands In Town") {
-        //     console.log(
-        //       "Name of the venue:         " + JSON.parse(body).venue[i].value
-        //     );
-        //   }
-        // }
+      console.log("Upcoming concerts for " + artist + ":");
+
+      for (var i = 0; i < jsonData.length; i++) {
+        var show = jsonData[i];
+
+        // Print data about each concert
+        // If a concert doesn't have a region, display the country instead
+        // Use moment to format the date
+        console.log(
+          show.venue.city +
+            "," +
+            (show.venue.region || show.venue.country) +
+            " at " +
+            show.venue.name +
+            " " +
+            moment(show.datetime).format("MM/DD/YYYY")
+        );
       }
     }
   );
 };
+
+
 
 // commands opts for initiation -- "We ARE the initiated, Bruce" - Bane
 var runLiri = function(argOne, argTwo) {
